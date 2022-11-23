@@ -2,9 +2,18 @@ import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
 import {ValidationPipe} from "@nestjs/common";
 import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+import * as expressHbs from 'express-handlebars';
+import * as hbs from 'hbs';
+
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    app.useStaticAssets (join(__dirname, '..', 'public'));
+    app.setBaseViewsDir(join(__dirname, '..', 'views'));
+    app.setViewEngine('hbs');
+
     app.enableCors();
     app.useGlobalPipes(new ValidationPipe({
         transform: true,
@@ -18,6 +27,28 @@ async function bootstrap() {
 
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
+    app.engine(
+      'hbs',
+      expressHbs.engine({
+          layoutsDir: join(process.cwd(), 'views/layouts'),
+          defaultLayout: 'layout',
+          extname: 'hbs',
+      }),
+    );
+    hbs.registerPartials(process.cwd() + '/views/partials');
+
+    const hbsHelper = require('handlebars');
+
+    hbsHelper.registerHelper('equal', function(context1,context2) {
+        if(context1===context2){
+            return context1;
+        }else{
+            return 'Было:'+'<s>'+ context1+'</s>'+' Стало: '+context2;
+        }
+
+    });
+
+    app.setViewEngine('hbs');
     await app.listen(process.env.PORT ||3000);
 }
 
