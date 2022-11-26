@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Render,
+  Res,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -31,6 +43,7 @@ export class CommentsController {
     }),
   }))
   create(@Param('newsId') newsId: number, @Body() createCommentDto: CreateCommentDto, @UploadedFile()cover: Express.Multer.File) {
+    console.log(cover);
     if (cover?.filename) {
       createCommentDto.cover = PATH_NEWS + cover.filename;
     } else {
@@ -61,6 +74,22 @@ export class CommentsController {
   })
   findAll(@Param('newsId') newsId: number) {
     return this.commentsService.findAll(newsId);
+
+  }
+
+
+  @Get('/all/:newsId')
+  @ApiTags('comments')
+  @ApiResponse({
+    status: 200,
+    description: 'render all comments by news id'
+  })
+  @Render('comments-list')
+  renderAll(@Param('newsId') newsId: number) {
+    const comments= this.commentsService.findAll(newsId);
+    return {
+      comments:comments
+    }
 
   }
 

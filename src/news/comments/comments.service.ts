@@ -12,7 +12,8 @@ export class CommentsService {
       message: 'Ура! Наш первый комментарий',
       author: 'Маша',
       cover:'https://otkritkis.com/wp-content/uploads/2022/06/pwwhk.jpg',
-      reply:[]
+      reply:[],
+      newsId:1
     }],
   };
 
@@ -30,7 +31,7 @@ export class CommentsService {
       }
     }
     if (Object.keys(this.comments).indexOf(String(newsId)) !== -1) {
-      this.comments[newsId]?.push({...comment,id:generatedId,reply:[]});
+      this.comments[newsId]?.push({...comment,id:generatedId,reply:[],newsId:newsId});
       return this.comments[newsId];
     }
 
