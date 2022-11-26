@@ -3,5 +3,9 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
+    "assets": [
+      { "include": "../public/static/**/*","watchAssets": true,"outDir": "dist/public" },
+      {"include":  "mail/templates/**/*","watchAssets": true}
+    ]
   }
 }

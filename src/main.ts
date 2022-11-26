@@ -10,8 +10,8 @@ import * as hbs from 'hbs';
 
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
-    app.useStaticAssets (join(__dirname, '..', 'public'));
-    app.setBaseViewsDir(join(__dirname, '..', 'views'));
+    app.useStaticAssets (join(process.cwd(), 'public'));
+    app.setBaseViewsDir(join(process.cwd(), 'views'));
     app.setViewEngine('hbs');
 
     app.enableCors();
@@ -45,7 +45,14 @@ async function bootstrap() {
         }else{
             return 'Было:'+'<s>'+ context1+'</s>'+' Стало: '+context2;
         }
+    });
 
+    hbsHelper.registerHelper('ternOperator', function(value:any,content:string) {
+        return value?value:content;
+    });
+
+    hbsHelper.registerHelper('url', function(path:string,param1:number,param2:number) {
+        return `${path}/${param1}/${param2}`;
     });
 
     app.setViewEngine('hbs');

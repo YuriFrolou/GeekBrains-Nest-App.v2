@@ -28,6 +28,11 @@ export class CreateCommentDto {
     @IsArray()
     @IsOptional()
     reply?: CreateCommentDto[];
+
+    @ApiPropertyOptional()
+    @IsInt()
+    @IsOptional()
+    newsId?: number;
 }
 
 export type Comments = Record<string | number, CreateCommentDto[]>;

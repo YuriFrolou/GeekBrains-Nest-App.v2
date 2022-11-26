@@ -3,6 +3,10 @@ import {ApiProperty, ApiPropertyOptional} from "@nestjs/swagger";
 import { CreateCommentDto } from '../comments/dto/create-comment.dto';
 
 export class CreateNewsDto {
+    @ApiPropertyOptional()
+    @IsInt()
+    @IsOptional()
+    id?: number;
 
     @ApiProperty({type:String})
     @IsString()

@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+  UseInterceptors,
+  UploadedFile,
+  Render,
+} from '@nestjs/common';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
 import { UpdateNewsDto } from './dto/update-news.dto';
@@ -11,8 +23,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { HelperFileLoad } from '../utils/HelperFileLoad';
 
-const PATH_NEWS='/static/';
-HelperFileLoad.path=PATH_NEWS;
+
+const PATH_NEWS = '/static/';
+HelperFileLoad.path = PATH_NEWS;
 
 @Controller('news')
 export class NewsController {
@@ -28,15 +41,15 @@ export class NewsController {
     description: 'create new news',
     type: [CreateNewsDto],
   })
-  @UseInterceptors(FileInterceptor('cover',{
-    storage:diskStorage({
+  @UseInterceptors(FileInterceptor('cover', {
+    storage: diskStorage({
       destination: HelperFileLoad.destinationPath,
-      filename: HelperFileLoad.customFileName
-    })
+      filename: HelperFileLoad.customFileName,
+    }),
   }))
-  create(@Body() createNewsDto: CreateNewsDto,@UploadedFile()cover:Express.Multer.File) {
-    if(cover?.filename){
-      createNewsDto.cover=PATH_NEWS+cover.filename;
+  create(@Body() createNewsDto: CreateNewsDto, @UploadedFile()cover: Express.Multer.File) {
+    if (cover?.filename) {
+      createNewsDto.cover = PATH_NEWS + cover.filename;
     }
     return this.newsService.create(createNewsDto);
   }
@@ -48,13 +61,16 @@ export class NewsController {
     status: 200,
     description: 'render all news',
   })
+  @Render('news-list')
   renderAllNews() {
     const news = this.newsService.findAll();
-    const content = renderAllNews(news);
-    return renderTemplate(content, {
-      title: 'Список новостей',
-      description: 'Самые крутые новости',
-    });
+    return {
+      news: news,
+      seo:{
+        title: 'Список новостей',
+        description: 'Самые крутые новости'
+      },
+    };
   }
 
 
@@ -64,19 +80,22 @@ export class NewsController {
     status: 200,
     description: 'render news by id',
   })
-  renderOneNews(@Param('id')id:number) {
+  @Render('news-detail')
+  renderOneNews(@Param('id')id: number) {
     const news = this.newsService.findOne(id);
     const comments = this.commentsService.findAll(id);
-    const content = renderNewsDetail(id,{...news,
-      comments:comments.length>0?comments:[]});
-    return renderTemplate(content, {
-      title: 'Детальная страница новости',
-      description: 'Самая крутая новость',
-    });
-  }
 
-
-
+    return {
+      news: {
+        ...news,
+        comments: comments.length > 0 ? comments : []
+      },
+      seo:{
+        title: 'Детальная страница новости',
+        description: 'Самая крутая новость'
+      },
+    };
+     }
 
   @Get()
   @ApiTags('news')
@@ -100,10 +119,12 @@ export class NewsController {
     description: 'get news by id',
     type: CreateNewsDto,
   })
-  findOne(@Param('id') id: number):Object {
+  findOne(@Param('id') id: number): Object {
     const comments = this.commentsService.findAll(id);
-    return  {...this.newsService.findOne(id),
-      comments:comments.length>0?comments:[]};
+    return {
+      ...this.newsService.findOne(id),
+      comments: comments.length > 0 ? comments : [],
+    };
   }
 
   @Patch(':id')
